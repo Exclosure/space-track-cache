@@ -12,17 +12,27 @@ These queries only allow you to pull _all_ of the TLE data
 aligned to a particular UTC date, and are cached in s3 and
 reused to avoid pulling on space-track.
 
+To break this down concretely the following diagram:
+
 ```
-==========        ==============        ===================
-| Client |   ==>  | AWS Lambda | <====> | Space-Track.org |
-==========        ==============        ===================
-                        ^
-                        |
-                        V
+========== --1--> ==============        ===================
+| Client |        | AWS Lambda | <--3-- | Space-Track.org |
+========== <--5-- ==============        ===================
+                     ^    |
+                     |    4
+                     2    |
+                     |    V
                 ==================
                 | S3 Cached TLEs |
                 ==================
 ```
+
+1. The client requests TLE data for a particular day
+2. The lambda attempts to pull data from the cache
+3. If it isn't present in the cache, it pulls it from space-track
+4. The TLE data from space track is inserted in the cache
+5. The TLE data is returned to the request maker
+
 
 At the time of writing the s3 cache has >90% of all days available.
 Additionally, the client interface will self-throttle in the unlikely
