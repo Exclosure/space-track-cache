@@ -2,8 +2,11 @@
   "name": "server",
   "description": "",
   "version": "0.1.0",
-  "dependencies": {},
+  "dependencies": {
+    "serverless": "^2.54.0"
+  },
   "devDependencies": {
+    "serverless-domain-manager": "^5.1.5",
     "serverless-python-requirements": "^5.1.1"
   }
 }
