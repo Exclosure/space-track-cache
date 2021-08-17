@@ -25,6 +25,8 @@ class TLEClient:
         self._rpm_throttle = Throttle(limiter=limiter, rate=Quota.per_minute(30))
         self._rph_throttle = Throttle(limiter=limiter, rate=Quota.per_hour(300))
 
+        self._next_request = time.time()
+
     def _ratelimit_pause(self):
         """Perform get request, handling rate limiting."""
         minute_limit = self._rpm_throttle.check("st_min_key", 1)
@@ -38,6 +40,8 @@ class TLEClient:
         if hour_limit.limited:
             sleep_time = max(sleep_time, hour_limit.retry_after.total_seconds())
 
+        self._next_request = time.time() + sleep_time
+        
         if sleep_time > 0:
             time.sleep(sleep_time)
 
@@ -70,4 +74,4 @@ if __name__ == "__main__":
     date = "2000-01-01" or input("YYYY-MM-DD:")
     dt = datetime.datetime.strptime(date, DATE_FMT)
 
-    print(TLEClient(un, pw).get_tle_for_day(dt))
+    print(TLEClient(un, pw).get_tle_for_dt(dt))

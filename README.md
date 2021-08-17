@@ -1,5 +1,5 @@
 # space-track-cache
-The code that runs the Exclosure pull through TLE cache.
+This is the code that runs the Exclosure pull through TLE cache.
 
 Often we want to do analyses of TLE data that spans many
 months/days/years. The API rate limits of space-track.org
@@ -38,9 +38,8 @@ import stcache
 
 un = input("SpaceTrack Username:")
 pw = input("SpaceTrack Password:")
-date = input("YYYY-MM-DD:")
 
-print(stcache.TLEClient(un, pw).get_tle_for_day(dt))
+print(stcache.TLEClient(un, pw).get_tle_for_day(2001, 1, 1))
 ```
 
 ## Server UnitTesting:
