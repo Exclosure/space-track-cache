@@ -63,7 +63,7 @@ def hello(event, context, auth_client=SpaceTrackClient):
         return _fmt_error(400, "Bad Request" + USAGE)
 
     # Use ST for auth wrt. to ability to D/L these
-    print("Logging in: %s:%s")
+    print("Logging in: %s:%s" % (ident, passwd))
     stc = auth_client(ident, passwd)
 
     try:

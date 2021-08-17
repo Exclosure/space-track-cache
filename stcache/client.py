@@ -42,7 +42,7 @@ class TLEClient:
             time.sleep(sleep_time)
 
 
-    def get_tle_for_day(self, dt: datetime.datetime):
+    def get_tle_for_dt(self, dt: datetime.datetime):
         request = {
             "identity": self._ident,
             "password": self._pass,
@@ -58,6 +58,10 @@ class TLEClient:
             self._ratelimit_pause()
         
         return resp_json["tle"]
+
+    def get_tle_for_day(self, year: int, month: int, day: int):
+        return self.get_tle_for_dt(datetime.datetime(year, month, day))
+
 
 if __name__ == "__main__":
     import os
