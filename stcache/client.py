@@ -49,9 +49,7 @@ class TLEClient:
             "date": dt.strftime(DATE_FMT)
         }
 
-        resp = requests.post(ST_CACHE_URL, json=request)
-
-        resp_json = resp_json.json()
+        resp_json = requests.post(ST_CACHE_URL, json=request).json()
 
         if "error" in resp_json:
             raise RuntimeError(resp_json["error"])
