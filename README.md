@@ -1,5 +1,5 @@
 # space-track-cache
-This is the code that runs the Exclosure pull through TLE cache.
+This is the code that runs the Exclosure pull-through TLE cache.
 
 Often we want to do analyses of TLE data that spans many
 months/days/years. The API rate limits of space-track.org

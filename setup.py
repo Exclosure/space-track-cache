@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.2' 
+VERSION = '0.0.3' 
 DESCRIPTION = 'Space-Track Pull through TLE cache'
 LONG_DESCRIPTION = 'This is a utility to cache and index TLE files from space-track.org'
 
