@@ -13,6 +13,7 @@ from rush.stores.dictionary import DictionaryStore as RushDictionaryStore
 ST_CACHE_URL = "https://api.txcl.io/tle/day"
 DATE_FMT = "%Y-%m-%d"
 
+
 class TLEClient:
     def __init__(self, identity: str, password: str):
         self._ident = identity
@@ -47,8 +48,14 @@ class TLEClient:
             "password": self._pass,
             "date": dt.strftime(DATE_FMT)
         }
-        resp_json = requests.post(ST_CACHE_URL, json=request).json()
-        print(resp_json)
+
+        resp = requests.post(ST_CACHE_URL, json=request)
+
+        resp_json = resp_json.json()
+
+        if "error" in resp_json:
+            raise RuntimeError(resp_json["error"])
+
         if not resp_json["cached"]:
             self._ratelimit_pause()
         
