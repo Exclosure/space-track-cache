@@ -29,6 +29,10 @@ Additionally, the client interface will self-throttle in the unlikely
 case where a large number of non cached entities are desired.
 
 ## Using the client
+Install this module by:
+`pip install stcache`
+
+Use it like:
 ```python
 import stcache
 
