@@ -26,7 +26,7 @@ class AuthBad(Auth):
 
 
 class HandlerTests(TestCase):
-    def _assert_has_required_feilds(self, deser: dict):
+    def _assert_has_required_fields(self, deser: dict):
         assert "requestID" in deser
         uuid.UUID(deser["requestID"])
         assert deser["version"] == "0.0.2"
@@ -37,7 +37,7 @@ class HandlerTests(TestCase):
         assert response["statusCode"] == 200
         deserialized = json.loads(response["body"])        
         assert "error" not in deserialized
-        self._assert_has_required_feilds(deserialized)
+        self._assert_has_required_fields(deserialized)
 
     def test_auth_failure(self):
         event = {"body": json.dumps({"identity": "foo", "password": "bar", "date": "2001-01-01"})}
@@ -46,7 +46,7 @@ class HandlerTests(TestCase):
         deserialized = json.loads(response["body"])
        
         assert "error" in deserialized
-        self._assert_has_required_feilds(deserialized)
+        self._assert_has_required_fields(deserialized)
 
     def test_malformed_date(self):
         event = {"body": json.dumps({"identity": "foo", "password": "bar", "date": "2001-53-01"})}
@@ -56,7 +56,7 @@ class HandlerTests(TestCase):
         deserialized = json.loads(response["body"])
 
         assert "error" in deserialized
-        self._assert_has_required_feilds(deserialized)
+        self._assert_has_required_fields(deserialized)
 
     def test_content_correctness(self):
         # The early content that is in the pullthrough cache
