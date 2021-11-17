@@ -51,7 +51,7 @@ def insert_data_to_cache(tle_data: str, dt: datetime.datetime):
     S3.put_object(Body=tle_data.encode(), Key=_dt_hash(dt))
 
 
-def hello(event, context, auth_client=SpaceTrackClient):
+def hello(event, context, auth_client=SpaceTrackClient, query_call=query_cache_for_date):
     # Request format validation
     try:
         body_json = json.loads(event["body"])
@@ -72,7 +72,7 @@ def hello(event, context, auth_client=SpaceTrackClient):
         return _fmt_error(403, "Bad SpaceTrack Credentials")
 
     # Check the cache for the date in question
-    tle_data = query_cache_for_date(query_dt)
+    tle_data = query_call(query_dt)
     cache_hit = tle_data is not None
 
     if not cache_hit:

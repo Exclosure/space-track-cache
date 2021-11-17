@@ -27,7 +27,7 @@ class AuthBad(Auth):
 class HandlerTests(TestCase):
     def test_auth_success(self):
         event = {"body": json.dumps({"identity": "foo", "password": "bar", "date": "2001-01-01"})}
-        response = handler.hello(event, {}, auth_client=AuthGood)
+        response = handler.hello(event, {}, auth_client=AuthGood, query_call=lambda date:"foo")
         assert response["statusCode"] == 200
         print(json.loads(response["body"]))
         
