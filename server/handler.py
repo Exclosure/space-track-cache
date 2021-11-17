@@ -1,6 +1,7 @@
 import datetime
 import json
 import hashlib
+import uuid
 
 import boto3
 
@@ -8,10 +9,12 @@ from spacetrack import SpaceTrackClient
 from spacetrack.base import AuthenticationError
 import spacetrack.operators as op
 
+HANDLER_SEMVER = "0.0.2"
+
 S3 = boto3.client('s3', region_name = 'us-west-2')
 
-def _fmt_error(code: int, message: str):
-    return {"statusCode": code, "body": json.dumps({"error": message})}
+def _fmt_error(code: int, message: str, request_id: str):
+    return {"statusCode": code, "body": json.dumps({"version": HANDLER_SEMVER, "error": message, "requestID": request_id})}
 
 BUCKET_NAME = "space-track-cache"
 DATE_FMT = "%Y-%m-%d"
@@ -22,7 +25,6 @@ USAGE = """
     "date": "YYYY-MM-DD"
 }
 """
-
 
 def query_stc_for_date(client: SpaceTrackClient, dt: datetime):
     start_date = dt.date()
@@ -52,6 +54,8 @@ def insert_data_to_cache(tle_data: str, dt: datetime.datetime):
 
 
 def hello(event, context, auth_client=SpaceTrackClient):
+    request_id = str(uuid.uuid4())
+    print("Started handler for request ID:" + request_id)
     # Request format validation
     try:
         body_json = json.loads(event["body"])
@@ -60,16 +64,17 @@ def hello(event, context, auth_client=SpaceTrackClient):
         date_string = body_json["date"]
         query_dt = datetime.datetime.strptime(date_string, DATE_FMT)
     except (json.JSONDecodeError, KeyError, ValueError):
-        return _fmt_error(400, "Bad Request" + USAGE)
+        return _fmt_error(400, "Bad Request" + USAGE, request_id)
 
     # Use ST for auth wrt. to ability to D/L these
-    print("Logging in: %s:%s" % (ident, passwd))
+    print("Logging in: %s:%s" % (ident, "*" * len(passwd)))
     stc = auth_client(ident, passwd)
 
     try:
         stc.authenticate()
     except AuthenticationError:
-        return _fmt_error(403, "Bad SpaceTrack Credentials")
+        return _fmt_error(403, "Bad SpaceTrack Credentials", request_id)
+    print("Logged in successfully")
 
     # Check the cache for the date in question
     tle_data = query_cache_for_date(query_dt)
@@ -81,5 +86,5 @@ def hello(event, context, auth_client=SpaceTrackClient):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"tle": tle_data, "cached": cache_hit})
+        "body": json.dumps({"tle": tle_data, "cached": cache_hit, "requestID": request_id, "version": HANDLER_SEMVER})
     }

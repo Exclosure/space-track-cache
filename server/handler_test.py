@@ -3,6 +3,7 @@ import json
 import os
 from posix import environ
 from unittest import TestCase
+import uuid
 
 from spacetrack import SpaceTrackClient
 from spacetrack.base import AuthenticationError
@@ -25,25 +26,37 @@ class AuthBad(Auth):
 
 
 class HandlerTests(TestCase):
+    def _assert_has_required_fields(self, deser: dict):
+        assert "requestID" in deser
+        uuid.UUID(deser["requestID"])
+        assert deser["version"] == "0.0.2"
+
     def test_auth_success(self):
         event = {"body": json.dumps({"identity": "foo", "password": "bar", "date": "2001-01-01"})}
         response = handler.hello(event, {}, auth_client=AuthGood)
         assert response["statusCode"] == 200
-        print(json.loads(response["body"]))
-        
+        deserialized = json.loads(response["body"])        
+        assert "error" not in deserialized
+        self._assert_has_required_fields(deserialized)
 
     def test_auth_failure(self):
         event = {"body": json.dumps({"identity": "foo", "password": "bar", "date": "2001-01-01"})}
         response = handler.hello(event, {}, auth_client=AuthBad)
         assert response["statusCode"] == 403
-        assert "error" in json.loads(response["body"]) 
+        deserialized = json.loads(response["body"])
+       
+        assert "error" in deserialized
+        self._assert_has_required_fields(deserialized)
 
-    
     def test_malformed_date(self):
         event = {"body": json.dumps({"identity": "foo", "password": "bar", "date": "2001-53-01"})}
         response = handler.hello(event, {}, auth_client=AuthGood)
         assert response["statusCode"] == 400
-        assert "error" in json.loads(response["body"]) 
+
+        deserialized = json.loads(response["body"])
+
+        assert "error" in deserialized
+        self._assert_has_required_fields(deserialized)
 
     def test_content_correctness(self):
         # The early content that is in the pullthrough cache
@@ -55,7 +68,7 @@ class HandlerTests(TestCase):
 
         # Skip this test if we don't have the environment variables
         if (user is None) or (password is None):
-            pytest.skip("Skipping test, no crednetials to test with")
+            pytest.skip("Skipping test, no credentials to test with")
 
         stc = SpaceTrackClient(user, password)
         dt = datetime.datetime(1974, 1, 1)
