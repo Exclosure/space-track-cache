@@ -45,30 +45,15 @@ Install this module by:
 Use it like:
 ```python
 import stcache
-from getpass import getpass
 
-username = input("SpaceTrack Username:")
-password = getpass("SpaceTrack Password:")
+un = input("SpaceTrack Username:")
+pw = input("SpaceTrack Password:")
 
-print(stcache.TLEClient(username, password).get_tle_for_day(2001, 1, 1))
+print(stcache.TLEClient(un, pw).get_tle_for_day(2001, 1, 1))
 ```
 
-# Development
-
-For development, you'll want to install both the
-`dev` and `server` extra requirements.
-
+## Server UnitTesting:
 ```bash
-pip install -e ".[dev,server]"
-```
-
-Note that the `server` extra does not install the
-`server` package, just the requirements to run the server.
-
-## Unit tests
-
-You can run the tests locally with
-
-```bash
-pytest
+cd server
+pytest .
 ```
