@@ -1,28 +1,37 @@
 #!/usr/bin/env python3
+"""Client for interacting with TLE cache."""
 import datetime
-from getpass import getpass
 import os
 import textwrap
 import time
+from getpass import getpass
 
 import requests
-from rush.quota import Quota
-from rush.throttle import Throttle
 from rush.limiters.periodic import PeriodicLimiter
+from rush.quota import Quota
 from rush.stores.dictionary import DictionaryStore as RushDictionaryStore
-
+from rush.throttle import Throttle
 
 ST_CACHE_URL = "https://api.txcl.io/tle/day"
 DATE_FMT = "%Y-%m-%d"
 
 _UTC = datetime.timezone.utc
 
+
 class TLEClientError(RuntimeError):
     """Class for errors related to TLE client."""
 
 
 class TLEClient:
+    """Main TLE API."""
+
     def __init__(self, identity: str, password: str):
+        """Initialize the client.
+
+        Arguments:
+            identity: A SpaceTrack.org username.
+            password: A SpaceTrack.org password.
+        """
         self._ident = identity
         self._pass = password
 
@@ -54,11 +63,12 @@ class TLEClient:
         if sleep_time > 0:
             time.sleep(sleep_time)
 
-
     def get_tle_for_dt(self, dt: datetime.datetime, use_cache=True) -> str:
         """Get the TLE data for a date given by the datetime in UTC."""
         if not _tz_aware(dt):
-            raise TLEClientError(textwrap.dedent(f"""
+            raise TLEClientError(
+                textwrap.dedent(
+                    f"""
                 Datetime dt must be timezone-aware but
                 found dt.tzinfo={dt.tzinfo}. If this date was
                 specified in UTC without a timezone, consider
@@ -69,12 +79,15 @@ class TLEClient:
                 If the date is in some other timezone, convert
                 to UTC prior to calling this function.
                 """
-            ))
+                )
+            )
 
         if not dt.tzinfo.utcoffset != 0:
             # This could be a warning, but timezone issues cause so
             # many problems, let's keep it an error.
-            raise TLEClientError(f"Timezone must be in UTC, but got dt.tzinfo={dt.tzinfo}.")
+            raise TLEClientError(
+                f"Timezone must be in UTC, but got dt.tzinfo={dt.tzinfo}."
+            )
 
         date_key = dt.strftime(DATE_FMT)
 
@@ -92,7 +105,9 @@ class TLEClient:
         resp_json = response.json()
 
         if "error" in resp_json:
-            raise TLEClientError(f"Error in TLE data for {date_key}: {resp_json['error']}")
+            raise TLEClientError(
+                f"Error in TLE data for {date_key}: {resp_json['error']}"
+            )
 
         if not resp_json.get("cached"):
             self._ratelimit_pause()
@@ -105,12 +120,19 @@ class TLEClient:
 
     def get_tle_for_day(self, year: int, month: int, day: int, use_cache=True):
         """Get the TLE for a given day in UTC."""
-        return self.get_tle_for_dt(datetime.datetime(year, month, day, tzinfo=_UTC), use_cache=use_cache)
+        return self.get_tle_for_dt(
+            datetime.datetime(year, month, day, tzinfo=_UTC), use_cache=use_cache
+        )
 
 
 def main():
-    username = os.environ.get("SPACETRACK_USERNAME") or input("SpaceTrack.org username:")
-    password = os.environ.get("SPACETRACK_PASSWORD") or getpass("SpaceTrack.org password:")
+    """Command-line interface to this tool."""
+    username = os.environ.get("SPACETRACK_USERNAME") or input(
+        "SpaceTrack.org username:"
+    )
+    password = os.environ.get("SPACETRACK_PASSWORD") or getpass(
+        "SpaceTrack.org password:"
+    )
     date = "2000-01-01" or input("YYYY-MM-DD:")
     dt = datetime.datetime.strptime(date, DATE_FMT)
     dt_utc = dt.astimezone(tz=datetime.timezone.utc)
