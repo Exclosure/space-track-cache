@@ -9,7 +9,9 @@ from spacetrack import SpaceTrackClient
 from spacetrack.base import AuthenticationError
 import spacetrack.operators as op
 
-HANDLER_SEMVER = "0.0.2"
+from .__version__ import __version__
+
+HANDLER_SEMVER = __version__
 
 S3 = boto3.client('s3', region_name = 'us-west-2')
 
