@@ -65,6 +65,12 @@ pip install -e ".[dev,server]"
 Note that the `server` extra does not install the
 `server` package, just the requirements to run the server.
 
+Set up your pre-commit hooks:
+
+```bash
+pre-commit
+```
+
 ## Unit tests
 
 You can run the tests locally with
