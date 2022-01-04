@@ -26,12 +26,12 @@ USAGE = """
 }
 """
 
-def query_stc_for_date(client: SpaceTrackClient, dt: datetime):
+def query_stc_for_date(client: SpaceTrackClient, dt: datetime.datetime) -> str:
     start_date = dt.date()
     end_date = (dt + datetime.timedelta(days=1)).date()
     date_bounds = op.inclusive_range(start_date, end_date)
 
-    return client.tle(epoch=date_bounds, format='3le', orderby='epoch')
+    return client.tle(epoch=date_bounds, format='3le', orderby='epoch')  # type: ignore
 
 
 def _dt_hash(dt: datetime.datetime):
