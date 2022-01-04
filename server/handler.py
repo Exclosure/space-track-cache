@@ -1,22 +1,30 @@
+"""Handle requests for cached TLE data."""
+# pylint: disable=invalid-name
 import datetime
-import json
 import hashlib
+import json
 import uuid
 
 import boto3
-
+import spacetrack.operators as op
 from spacetrack import SpaceTrackClient
 from spacetrack.base import AuthenticationError
-import spacetrack.operators as op
 
 from .__version__ import __version__
 
 HANDLER_SEMVER = __version__
 
-S3 = boto3.client('s3', region_name = 'us-west-2')
+S3 = boto3.client("s3", region_name="us-west-2")
+
 
 def _fmt_error(code: int, message: str, request_id: str):
-    return {"statusCode": code, "body": json.dumps({"version": HANDLER_SEMVER, "error": message, "requestID": request_id})}
+    return {
+        "statusCode": code,
+        "body": json.dumps(
+            {"version": HANDLER_SEMVER, "error": message, "requestID": request_id}
+        ),
+    }
+
 
 BUCKET_NAME = "space-track-cache"
 DATE_FMT = "%Y-%m-%d"
@@ -28,12 +36,14 @@ USAGE = """
 }
 """
 
+
 def query_stc_for_date(client: SpaceTrackClient, dt: datetime.datetime) -> str:
+    """Query SpaceTrack for a given date."""
     start_date = dt.date()
     end_date = (dt + datetime.timedelta(days=1)).date()
     date_bounds = op.inclusive_range(start_date, end_date)
 
-    return client.tle(epoch=date_bounds, format='3le', orderby='epoch')  # type: ignore
+    return client.tle(epoch=date_bounds, format="3le", orderby="epoch")  # type: ignore
 
 
 def _dt_hash(dt: datetime.datetime):
@@ -43,6 +53,7 @@ def _dt_hash(dt: datetime.datetime):
 
 
 def query_cache_for_date(dt: datetime.datetime):
+    """Query our cache for the date."""
     try:
         key = S3.get_object(Bucket=BUCKET_NAME, Key=_dt_hash(dt))
     except S3.exceptions.NoSuchKey:
@@ -52,10 +63,15 @@ def query_cache_for_date(dt: datetime.datetime):
 
 
 def insert_data_to_cache(tle_data: str, dt: datetime.datetime):
+    """Insert data into cache."""
     S3.put_object(Body=tle_data.encode(), Key=_dt_hash(dt))
 
 
-def hello(event, context, auth_client=SpaceTrackClient, query_call=query_cache_for_date):
+def hello(
+    event, context, auth_client=SpaceTrackClient, query_call=query_cache_for_date
+):
+    """Handle call to server."""
+    del context  # unused
     request_id = str(uuid.uuid4())
     print("Started handler for request ID:" + request_id)
 
@@ -70,7 +86,7 @@ def hello(event, context, auth_client=SpaceTrackClient, query_call=query_cache_f
         return _fmt_error(400, "Bad Request" + USAGE, request_id)
 
     # Use ST for auth wrt. to ability to D/L these
-    print("Logging in: %s:%s" % (ident, "*" * len(passwd)))
+    print(f"Logging in: {ident}:{len(passwd)}")
     stc = auth_client(ident, passwd)
 
     try:
@@ -89,5 +105,12 @@ def hello(event, context, auth_client=SpaceTrackClient, query_call=query_cache_f
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"tle": tle_data, "cached": cache_hit, "requestID": request_id, "version": HANDLER_SEMVER})
+        "body": json.dumps(
+            {
+                "tle": tle_data,
+                "cached": cache_hit,
+                "requestID": request_id,
+                "version": HANDLER_SEMVER,
+            }
+        ),
     }
