@@ -32,8 +32,7 @@ EXTRAS = {
     "server": SERVER_REQUIRES,
 }
 
-<<<<<<< HEAD
-=======
+
 # Read in the version from __version__.py
 def get_version_info(module: str):
     """Execute a module's __version__.py file and return the variables.
