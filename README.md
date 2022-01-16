@@ -1,4 +1,5 @@
 # space-track-cache
+[![Python package](https://github.com/Exclosure/space-track-cache/actions/workflows/test.yml/badge.svg)](https://github.com/Exclosure/space-track-cache/actions/workflows/test.yml)
 This is the code that runs the Exclosure pull-through TLE cache.
 
 Often we want to do analyses of TLE data that spans many
