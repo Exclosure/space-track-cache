@@ -26,11 +26,6 @@ repos:
       - id: isort
         name: isort (python)
         args: [--profile=black]
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.1.1
-    hooks:
-      - id: pydocstyle
-        exclude: "^docs\\/|^tests\\/|setup.py|server|__init__.py"  # server API is not public
   - repo: local
     hooks:
       - id: pylint

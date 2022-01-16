@@ -2,9 +2,10 @@ import os
 
 from setuptools import find_packages, setup
 
-VERSION = "0.0.3"
 DESCRIPTION = "Space-Track Pull through TLE cache"
 LONG_DESCRIPTION = "This is a utility to cache and index TLE files from space-track.org"
+
+# Note: Version set in stcache/__version__.py
 
 REQUIRED = [
     "requests",
@@ -14,7 +15,7 @@ REQUIRED = [
 
 DEV_REQUIRES = [
     "black",  # Linting
-    "pre-commit", # Hooks
+    "pre-commit",  # Hooks
     "pytest",  # Testing
     "pylint",  # Linting
 ]
@@ -30,6 +31,24 @@ EXTRAS = {
     "dev": DEV_REQUIRES,
     "server": SERVER_REQUIRES,
 }
+
+
+# Read in the version from __version__.py
+def get_version_info(module: str):
+    """Execute a module's __version__.py file and return the variables.
+
+    This approach is used because the setup.py file should not
+    attempt to import the modules that it is setting up.
+    """
+    here = os.path.abspath(os.path.dirname(__file__))
+    about = {}
+    with open(os.path.join(here, "stcache", "__version__.py")) as f:
+        exec(f.read(), about)
+    return about
+
+
+VERSION = get_version_info("stcache")["__version__"]
+
 
 # Setting up
 setup(

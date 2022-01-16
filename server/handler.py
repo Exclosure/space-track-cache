@@ -10,7 +10,9 @@ import spacetrack.operators as op
 from spacetrack import SpaceTrackClient
 from spacetrack.base import AuthenticationError
 
-HANDLER_SEMVER = "0.0.2"
+from stcache import __version__ as stcache_version
+
+HANDLER_SEMVER = stcache_version
 
 S3 = boto3.client("s3", region_name="us-west-2")
 
@@ -51,7 +53,15 @@ def _dt_hash(dt: datetime.datetime):
 
 
 def query_cache_for_date(dt: datetime.datetime):
-    """Query our cache for the date."""
+    """Query for cached data.
+
+    Arguments:
+        dt:
+            The date to query the cache for.
+
+    Returns:
+        The data as a string if cached, otherwise ``None``.
+    """
     try:
         key = S3.get_object(Bucket=BUCKET_NAME, Key=_dt_hash(dt))
     except S3.exceptions.NoSuchKey:

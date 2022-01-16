@@ -10,6 +10,7 @@ import pytest
 from spacetrack import SpaceTrackClient
 from spacetrack.base import AuthenticationError
 
+import stcache
 from server import handler
 
 
@@ -40,7 +41,7 @@ class HandlerTests(TestCase):
     def _assert_has_required_fields(self, deser: dict):
         assert "requestID" in deser
         uuid.UUID(deser["requestID"])
-        assert deser["version"] == "0.0.2"
+        assert deser["version"] == stcache.__version__
 
     def test_auth_success(self):
         """Ensure that we are able to authorize."""
