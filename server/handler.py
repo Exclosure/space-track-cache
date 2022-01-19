@@ -26,7 +26,7 @@ def _fmt_error(code: int, message: str, request_id: str):
     }
 
 
-BUCKET_NAME = "space-track-cache"
+BUCKET_NAME = "exclosure-spacetrack-cache"
 DATE_FMT = "%Y-%m-%d"
 USAGE = """
 {
